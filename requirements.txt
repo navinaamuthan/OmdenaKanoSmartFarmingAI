@@ -1,8 +1,8 @@
-# requirements.txt
-streamlit
-pandas
-numpy
-scikit-learn
-joblib
-matplotlib
-seaborn
+streamlit==1.40.0
+plotly==5.18.0
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.1.3  # Match local version
+joblib==1.0.0        # Match local version
+matplotlib==3.9.2
+seaborn==0.13.2
