@@ -5,13 +5,23 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Load models (using st.cache_data for Streamlit 1.16.0+; use st.cache for older versions)
+# Load models with error handling for Streamlit Community Cloud
 @st.cache_data
 def load_models():
-    original_soil = joblib.load('models/random_forest_model_original_soil.pkl')
-    tweaked_soil = joblib.load('models/random_forest_model_tweaked_soil.pkl')
-    original_onset = joblib.load('models/random_forest_model_original_onset.pkl')
-    tweaked_onset = joblib.load('models/random_forest_model_tweaked_onset.pkl')
+    try:
+        # Attempt to load models with Git LFS paths
+        original_soil = joblib.load('models/random_forest_model_original_soil.pkl')
+        tweaked_soil = joblib.load('models/random_forest_model_tweaked_soil.pkl')
+        original_onset = joblib.load('models/random_forest_model_original_onset.pkl')
+        tweaked_onset = joblib.load('models/random_forest_model_tweaked_onset.pkl')
+    except Exception as e:
+        st.error(f"Error loading models: {e}. Using dummy models for testing.")
+        # Temporary dummy models for testing (replace with retrained models)
+        from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+        original_soil = RandomForestRegressor()
+        tweaked_soil = RandomForestRegressor()
+        original_onset = RandomForestClassifier()
+        tweaked_onset = RandomForestClassifier()
     return original_soil, tweaked_soil, original_onset, tweaked_onset
 
 original_soil, tweaked_soil, original_onset, tweaked_onset = load_models()
@@ -55,7 +65,7 @@ with st.form("prediction_form"):
     temp_roll_mean = st.slider("7-Day Avg Temperature (°C)", -10.0, 40.0, 15.0)
     temp_roll_std = st.slider("7-Day Std Temperature (°C)", 0.0, 10.0, 1.0)
     humid_roll_mean = st.slider("7-Day Avg Humidity (%)", 0.0, 100.0, 50.0)
-    humid_roll_std = st.slider("7-Day Std Humidity (%)", 0.0, 20.0, 0.0)
+    humid_roll_std = st.slider("7-Day Std Humidity (%)", 0.0, 20.0, 5.0)
 
     submit = st.form_submit_button("Predict")
 
@@ -140,5 +150,6 @@ if submit:
     st.bar_chart(onset_importance_original.set_index('Feature'))
 
 # Footer
-st.markdown("""Source code and dataset available at: https://github.com/navinaamuthan/OmdenaKanoSmartFarmingAI
+st.markdown("""
+    Source code and dataset available at: https://github.com/navinaamuthan/OmdenaKanoSmartFarmingAI
 """)
